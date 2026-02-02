@@ -1,6 +1,7 @@
 import type { ClawdbotConfig } from "openclaw/plugin-sdk";
 import type { FeishuConfig } from "./types.js";
 import { createFeishuClient } from "./client.js";
+import { resolveFeishuAccount } from "./accounts.js";
 import { normalizeFeishuTarget } from "./targets.js";
 
 export type FeishuDirectoryPeer = {
@@ -19,6 +20,7 @@ export async function listFeishuDirectoryPeers(params: {
   cfg: ClawdbotConfig;
   query?: string;
   limit?: number;
+  accountId?: string;
 }): Promise<FeishuDirectoryPeer[]> {
   const feishuCfg = params.cfg.channels?.feishu as FeishuConfig | undefined;
   const q = params.query?.trim().toLowerCase() || "";
@@ -47,6 +49,7 @@ export async function listFeishuDirectoryGroups(params: {
   cfg: ClawdbotConfig;
   query?: string;
   limit?: number;
+  accountId?: string;
 }): Promise<FeishuDirectoryGroup[]> {
   const feishuCfg = params.cfg.channels?.feishu as FeishuConfig | undefined;
   const q = params.query?.trim().toLowerCase() || "";
@@ -74,6 +77,7 @@ export async function listFeishuDirectoryPeersLive(params: {
   cfg: ClawdbotConfig;
   query?: string;
   limit?: number;
+  accountId?: string;
 }): Promise<FeishuDirectoryPeer[]> {
   const feishuCfg = params.cfg.channels?.feishu as FeishuConfig | undefined;
   if (!feishuCfg?.appId || !feishuCfg?.appSecret) {
@@ -81,7 +85,10 @@ export async function listFeishuDirectoryPeersLive(params: {
   }
 
   try {
-    const client = createFeishuClient(feishuCfg);
+    const account = params.accountId
+      ? resolveFeishuAccount({ cfg: params.cfg, accountId: params.accountId })
+      : { ...feishuCfg, accountId: "default" };
+    const client = createFeishuClient(account);
     const peers: FeishuDirectoryPeer[] = [];
     const limit = params.limit ?? 50;
 
@@ -118,6 +125,7 @@ export async function listFeishuDirectoryGroupsLive(params: {
   cfg: ClawdbotConfig;
   query?: string;
   limit?: number;
+  accountId?: string;
 }): Promise<FeishuDirectoryGroup[]> {
   const feishuCfg = params.cfg.channels?.feishu as FeishuConfig | undefined;
   if (!feishuCfg?.appId || !feishuCfg?.appSecret) {
@@ -125,7 +133,10 @@ export async function listFeishuDirectoryGroupsLive(params: {
   }
 
   try {
-    const client = createFeishuClient(feishuCfg);
+    const account = params.accountId
+      ? resolveFeishuAccount({ cfg: params.cfg, accountId: params.accountId })
+      : { ...feishuCfg, accountId: "default" };
+    const client = createFeishuClient(account);
     const groups: FeishuDirectoryGroup[] = [];
     const limit = params.limit ?? 50;
 

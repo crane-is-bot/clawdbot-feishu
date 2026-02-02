@@ -1,6 +1,7 @@
 import type { ClawdbotConfig } from "openclaw/plugin-sdk";
 import type { FeishuConfig } from "./types.js";
 import { createFeishuClient } from "./client.js";
+import { resolveFeishuAccount } from "./accounts.js";
 import { resolveReceiveIdType, normalizeFeishuTarget } from "./targets.js";
 import fs from "fs";
 import path from "path";
@@ -103,14 +104,19 @@ export async function downloadMessageResourceFeishu(params: {
   messageId: string;
   fileKey: string;
   type: "image" | "file";
+  accountId?: string;
 }): Promise<DownloadMessageResourceResult> {
-  const { cfg, messageId, fileKey, type } = params;
+  const { cfg, messageId, fileKey, type, accountId } = params;
   const feishuCfg = cfg.channels?.feishu as FeishuConfig | undefined;
   if (!feishuCfg) {
     throw new Error("Feishu channel not configured");
   }
 
-  const client = createFeishuClient(feishuCfg);
+  // Use accountId if provided, otherwise use feishuCfg directly
+  const account = accountId
+    ? resolveFeishuAccount({ cfg, accountId })
+    : { ...feishuCfg, accountId: "default" };
+  const client = createFeishuClient(account);
 
   const response = await client.im.messageResource.get({
     path: { message_id: messageId, file_key: fileKey },
