@@ -546,6 +546,7 @@ export async function handleFeishuMessage(params: {
   if (isGroup) {
     const groupPolicy = feishuCfg?.groupPolicy ?? "open";
     const groupAllowFrom = feishuCfg?.groupAllowFrom ?? [];
+    // DEBUG: log(`feishu[${account.accountId}]: groupPolicy=${groupPolicy}`);
     const groupConfig = resolveFeishuGroupConfig({ cfg: feishuCfg, groupId: ctx.chatId });
 
     const senderAllowFrom = groupConfig?.allowFrom ?? groupAllowFrom;
